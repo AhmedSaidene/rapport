@@ -1,0 +1,792 @@
+\chapter{Experimental Results}
+\label{chapter:discussion}
+
+In this chapter, we will evaluate and discuss the proposed model after being trained. To do this, we start with describing the selected CIC-DDoS-2019 dataset for training and testing then the followed steps for arriving to the graph's instances dataset building and splatting. Then, we present the model hyperparameters, the different architectures and the training process. Finally, we discuss the testing and performances results.
+
+\section{Dataset Selection} 
+The dataset chosen for this study is the CIC-DDoS-2019 dataset, provided by the Canadian Institute for Cybersecurity (CIC) \cite{cic}. It contains real network flow data with various types of the latest and most widespread DDoS attacks. These data are in more condensed formats, primarily containing meta-information about network connections. The dataset consists of two versions of data: raw PCAP data and CSV data. The authors used the CICFlowMeter-V3 traffic analyzer to extract more than 80 features from the PCAP files, and the results were saved in structured CSV files labeled by the University of New Brunswick.
+This dataset includes instances of 12 different up-to-date DDoS attack types. It contains 86 features, with 6 of them labeling and characterizing the flow itself based on Source IP, Source Port, Destination IP, Destination Port, Protocol, and Timestamp (attack time), and more than 80 features related to network traffic flow.
+The dataset has two disadvantages. The first significant disadvantage is that it is highly imbalanced. \textcolor{white}{.}The \textcolor{white}{.}second \textcolor{white}{.}disadvantage \textcolor{white}{.}is \textcolor{white}{.}that \textcolor{white}{.}the data \textcolor{white}{.}labeling \textcolor{white}{.}(the class label)\textcolor{white}{.} in\textcolor{white}{.} the\textcolor{white}{.} CSV\textcolor{white}{.} files\textcolor{white}{.} differs \textcolor{white}{.}between \textcolor{white}{.}the CSVs \textcolor{white}{.}of \textcolor{white}{.}the \textcolor{white}{.}training \textcolor{white}{.}data \textcolor{white}{.}generated \textcolor{white}{.}on \textcolor{white}{.}the \textcolor{white}{.}first \textcolor{white}{.}day \textcolor{white}{.}of \textcolor{white}{.}experimentation and \textcolor{white}{.}the \textcolor{white}{.}CSVs\textcolor{white}{.} of \textcolor{white}{.}the \textcolor{white}{.}test\textcolor{white}{.} data \textcolor{white}{.}generated\textcolor{white}{.} on\textcolor{white}{.} the\textcolor{white}{.} second\textcolor{white}{.} day. 
+\section{Data\textcolor{white}{.}Preparation} 
+\label{preprocessing}
+To make data suitable for training ad testing, we need to build graphs instances to be fed in our model. To do this, two major steps was followed: \textbf{data files preparation} and \textbf{graphs instances building}.\\
+\textbf{The data preparation} consists of releasing the following steps:
+\begin{enumerate}
+    \item Adding 'time' column in expresses the timestamp in hour and minute: It will be used in graphs building,
+    \item Sorting each file lines with ‘timestamp’ values,
+    \item \cite{ddos2019} performed a features selection approach on the selected dataset, table \ref{fig:features} shows these selected flows features, 
+    \item Columns 'time', 'source' and 'destination' are selected to be used in the graphs instances building phase,
+    \item Making columns names without spaces (to facilitate the data manipulation),
+    \item One hot encoding for categorical 'Protocol' Column,
+    \item Labels encoding,
+    \item Saving the resulting processed data
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=1.2]{figures/features.png}
+    \captionsetup{font=large}
+    \caption{Selected features in \cite{ddos2019}}
+    \label{fig:features}
+\end{figure}
+
+\end{enumerate}
+
+In the \textbf{graph's building} step, two sets of graphs instances were created:
+\begin{itemize}
+    \item \textbf{Per-minute graph's set}: This set was created based on the added 'time' column. Simply, each graph instance corresponds to a minute, as a result, from each file of the dataset, many graph instances was extracted. 980 graph instances were created, from which, we deleted instances containing a number of hosts nodes more than flows ones. The resulting set contains 902 graphs instances,
+    \item \textbf{Training and testing set}:
+Training and testing graph's set: From each file two graphs was created: One for testing and one for testing, respectively containing  20\%  and  80\%  of the file instances. As a result, this set contains 17 instances for training and 17 for testing. In sum, this set contains 113065  of benign and 1017585 of malicious flows nodes. The training contains respectively 76416 of benign and 828104 of malicious flows, and the testing contains respectively 36649 of benign and 189481 of malicious flows instances, It's clear that this dataset is highly imbalanced and its two sub sets contains the same percentages of both labels.
+\end{itemize} 
+
+
+
+%\section{Model Architecture} 
+
+
+\section{Model\textcolor{white}{.}Training} 
+
+\subsubsection{Cost Function}
+\textbf{The cross entropy loss} \cite{cross_entropy_loss} \cite{cross_entropy_loss_1}, \textcolor{white}{.}also\textcolor{white}{..}known\textcolor{white}{..}as\textcolor{white}{..}log loss, is inspired from the Cross-entropy that builds upon the idea of information theory entropy \cite{entropy}, that measures the difference between two probability distributions for a given random variable/set of events.
+The cross entropy loss can be applied in both binary and multi-class classification problems.\\
+ \textbf{The binary cross-entropy} 
+The binary cross-entropy loss \cite{cross_entropy_loss_1} 
+ is favored for its effectiveness in optimizing DNNs for binary classification problems. This make it a fundamental component in the training of binary DNN classifiers. It is computed as follows:
+\begin{equation}
+\text{BCELoss(x, t)} = -\frac{1}{N} \sum_{i=1}^{N} \left[ t_i \log(p_i) + (1 - t_i) \log(1 - p_i) \right]
+\end{equation}
+
+
+\begin{itemize}
+  \item \textbf{BCELoss(x, t):} Is the binary cross-entropy loss function,
+  \item \textbf{x:} The predicted set logits by the model,
+  \item \textbf{t:} The target values set (binary labels),
+  \item \textbf{N:} Total instances number in the forwarder batch.
+  \item \(\log\) denotes the natural logarithm.
+
+\end{itemize}
+
+Notice that the loss of each instance $i$ of the batch is a combination of two terms:
+\begin{itemize}
+    \item $t_i \cdot \log(p_i)$: Measures the loss when the true label $t_i$ is 1 (positive class). It encourages the predicted probability to be close to 1.
+    \item $(1 - t_i) \cdot \log(1 - x_i)$: Measures the loss when the true label $t_i$ is 0 (negative class). It encourages the predicted probability to be close to 0.
+\end{itemize}
+\textbf{Binary\textcolor{white}{..}cross-entropy with logistic loss}\textcolor{white}{..}serves\textcolor{white}{..}as\textcolor{white}{..}a measure of the dissimilarity between the predicted probabilities and the actual binary labels. In a binary DNN classifier, the output is often a probability score that a given input belongs to one of two classes (e.g., 0 or 1, true or false). The logistic loss, also known as the log loss, quantifies the error by comparing the predicted probability to the true binary label for each instance. It heavily penalizes predictions that are far from the actual label, thus encouraging the model to produce calibrated probability estimates.
+With Binary cross-entropy with logistic loss, the loss is\textcolor{white}{..}computed\textcolor{white}{..}as\textcolor{white}{..}follows:
+
+\begin{equation}
+\text{BCEWithLogitsLoss(x, t)} = - \frac{1}{N} \sum_{i=1}^{N} w_i \cdot \left(t_i \cdot \log(\sigma(x_i)) + (1 - t_i) \cdot \log(1 - \sigma(x_i))\right)
+\end{equation}
+
+where $\sigma(x)$ it the Sigmoid function which converts logits to probabilities.
+Notice that when forwording an instance in the DNN, the input will be a logist. In the back word optimisation step, the BCEWithLogitsLoss function apply a logistic regression on the predicted value. Where in prediction, we need to apply a Sigmoid transformation to get a probability. Then, to obtain the binary label, a threshold-based transformation must be applied on the outputted probability. \\
+For an instance $i$, to calculate its predicted label $y_i$, we choose a threshold value equal to 0.5 as follows:
+
+\begin{equation}
+y_i = 1 \text{ if } \sigma(x_i) > 0.5 \text{ else } 0 
+\end{equation}
+
+\subsubsection{Classes Weights For Model Training}
+To deal with the highly unbalancing of training data, we employed class weights \cite{classes_weights1} \cite{classes_weights2} during model training. By calculating these weights based on the dataset's class distribution, we assigned higher importance to the minority class (negative class in our case), which is often underrepresented. \\
+For an instance $i$ labeled $t_i$, it's weight $w_i$ is calculated as follows:
+\begin{equation}
+w_j =  \frac{N}{|t|  |c_j|} 
+\end{equation}
+Where:
+\begin{itemize}
+    \item $|t|$: Is\textcolor{white}{..}the\textcolor{white}{..}number\textcolor{white}{..}of\textcolor{white}{..}unique\textcolor{white}{..}labels,
+    \item $|c_j|$:\textcolor{white}{..}The\textcolor{white}{..}number\textcolor{white}{..}of instances labeled $t_i$.
+\end{itemize}
+
+These weights were then incorporated into the BCEWithLogitsLoss function. As a result, the model learned to make more informed decisions, giving greater consideration to the positive class during training.
+
+By incorporating these weights into the BCEWithLogitsLoss, we obtain the \textbf{Weighted Binary Cross Entropy With Logistic Loss} cost function used to calculate the loss as follows: 
+
+\begin{equation}
+\text{WeightedBCEWithLogitsLoss}(x, t, w) = - \frac{1}{N} \sum_{i=1}^{N} w_i \left[ t_i \cdot \log(\sigma(x_i)) + (1 - t_i) \cdot \log(1 - \sigma(x_i)) \right]
+\end{equation}
+
+Where $w$ is the set of weights and $w_i$ is the Weight assigned to each simple i.\\
+The combined use of class weights and BCEWithLogitsLoss proved effective in \textcolor{white}{.}improving \textcolor{white} {.}the\textcolor{white}{..}DNN's\textcolor{white}{..}performance. It not only enhanced overall accuracy but also significantly improved metrics such as\textcolor{white}{..}precision,\textcolor{white}{..}recall,\textcolor{white}{..}and\textcolor{white}{..}F1-score, especially for the minority class. This approach ensures that our binary DNN can make well-informed and balanced predictions, even when faced with imbalanced datasets.
+
+\section{Hyperparameters} 
+Hyperparameters of each model are described in Table \ref{table:fhp_table}. We choose a GCN layer for message passing with output dimension equal to 32 for better learning.
+We choose also as readout as a DNN with 1 output neuron as we mentioned in the loss function section.\\ 
+For the training, ADAM optimiser is chosen with learning rate equal to 0.0001, a number of training epochs equal to 100 and  the ReLU activation function in the readout DNN.\\
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+Hyperparameters & Description  \\
+\hline
+Update function & GCN layer to 32-dimension \\
+\hline
+Optimizer & ADAM with learning rate equal to 0.0001  \\
+\hline
+Epocks number 3 & 100  \\
+\hline
+Readout function & DNN with ReLU activation function \\
+\hline
+\end{tabular}
+\caption{Fixed Hyperparameters}
+\label{table:fhp_table}
+\end{table}
+
+
+Multiple models was trained and tested in order to choose the best one. These models are defined through several hyperparameters, such as the readout DNN architecture and  the employment of an activation function after the message passing. 
+The table \ref{table:hp_table} shows the different models.
+\\The dropout probability is equal to 0.1, and the activation function after the message passing is LeakyReLU with negative slope equal to 0.1.
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+Model & Readout Hidden Layers & Dropout & Activation After Message Passing \\
+\hline
+Model 1 & 128, 64, 32 & & Yes \\
+\hline
+Model 2 & 128, 64, 32 & & \\
+\hline
+Model 3 & 128, 64, 32, 16, 8, 4 & & Yes \\
+\hline
+Model 4 & 128, 64, 32, 16, 8, 4 & & \\
+\hline
+Model 5 & 128, 64, 32 & Yes & Yes \\
+\hline
+Model 6 & 128, 64, 32 & Yes & \\
+\hline
+Model 7 & 128, 64, 32, 16, 8, 4 & Yes & Yes \\
+\hline
+Model 8 & 128, 64, 32, 16, 8, 4 & Yes & \\
+\hline
+\end{tabular}
+\caption{Models Hyperparameters}
+\label{table:hp_table}
+\end{table}
+
+
+\section{Performance Metrics Evaluation and Discussion} 
+This section presents an evaluation of the proposed models against several performance metrics. It is structured as follows: first, a definition of the evaluation metrics is presented, then, performance metrics of each model are illustrated, and finally, a general discussion is given. 
+
+\subsection{Evaluation Metrics}
+The following metrics are used to evaluate and compare all models:
+ \subsubsection{Loss curve}
+ For each model, two loss curves are visualised: the first for all the 100 epochs, and the second for the last 50 epochs. The main objective is to determine if there is an over-fitting or an under-fitting during the learning process.
+
+\subsubsection{Classification results}
+On each set of the training, the testing and the per-minute graph's set \ref{preprocessing}, the performance metrics precision, accuracy, recall and f1-score are calculated in order to evaluate the classifier. These metrics are defined as follows:
+\begin{itemize}
+    \item \textbf{\textcolor{white}{..}Precision}:
+\textcolor{white}{..}Measures the\textcolor{white}{..}accuracy of\textcolor{white}{..}positive\textcolor{white}{..}predictions. It indicates how many of the cases predicted as positive are actually correct. It's calculated as follows:
+    \begin{equation}
+    \text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+    \end{equation}
+    \item \textbf{Accuracy}:
+    Measures\textcolor{white}{..}the\textcolor{white}{..}overall\textcolor{white}{..}correctness\textcolor{white}{..}of\textcolor{white}{..}predictions. It's calculated as follows:
+    \begin{equation}
+    \text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}
+    \end{equation}
+    \item \textbf{Recall (Sensitivity\textcolor{white}{..}or\textcolor{white}{..}True\textcolor{white}{..}Positive\textcolor{white}{..}Rate)}:
+    Quantifies a model's ability to identify all relevant instances. It indicates how many relevant instances have been correctly identified. It's calculated as follows:
+    \begin{equation}
+    \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+    \end{equation}
+    \item \textbf{F1 Score}:
+    The\textcolor{white}{..}F1\textcolor{white}{..}score\textcolor{white}{..}is\textcolor{white}{..}the\textcolor{white}{..}harmonic\textcolor{white}{..}mean\textcolor{white}{..}of\textcolor{white}{..}precision\textcolor{white}{..}and\textcolor{white}{..}recall. It provides\textcolor{white}{..}a\textcolor{white}{..}balanced\textcolor{white}{..}measure\textcolor{white}{..}of a\textcolor{white}{..}model's\textcolor{white}{..}performance, taking into account both false positives and false negatives. This is particularly useful when the class distribution is imbalanced. The F1 score is calculated as follows:
+    \begin{equation}
+    \text{F1 Score} = \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+    \end{equation}
+\end{itemize}
+In these formulas:
+\begin{itemize}
+    \item TP (True Positives) is\textcolor{white}{..}the\textcolor{white}{..}number\textcolor{white}{..}of\textcolor{white}{..}correctly\textcolor{white}{..}predicted positive\textcolor{white}{..}instances,
+    \item TN (True Negatives) is\textcolor{white}{..}the\textcolor{white}{..}number\textcolor{white}{..}of\textcolor{white}{..}correctly\textcolor{white}{..}predicted negative instances,
+    \item FP (False Positives)\textcolor{white}{..}is\textcolor{white}{..}the\textcolor{white}{..}number\textcolor{white}{..}of\textcolor{white}{..}incorrectly\textcolor{white}{..}predicted as positive\textcolor{white}{..}instances,
+    \item FN (False Negatives) is the\textcolor{white}{..}number\textcolor{white}{..}of\textcolor{white}{..}incorrectly\textcolor{white}{..}predicted as\textcolor{white}{..}negative\textcolor{white}{..}instances.
+\end{itemize}
+
+\subsubsection{ROC Curve} 
+The ROC curve, or receiver operating characteristic curve shows how well a classification model performs. Typically a plot of sensitivity (true positive rate) that is the recall, on the y-axis against 1-specificity (false positive rate) on the x-axis. The specificity is defined as follows:
+ \begin{equation}
+    \text{Specificity} = \frac{\text{TN}}{\text{FP} + \text{TN}}
+    \end{equation}
+The ROC curve visualizes the model's ability to distinguish between positive and negative instances as the decision threshold changes. When the threshold is set low, more instances are classified as positive, resulting in a higher false positive rate and a higher true positive rate as demonstrated in Figure \ref{fig:roc} that shows the ROC space for a "better" and "worse" classifier. In other words, when the threshold is set high, fewer instances are classified as positive, leading to a lower false positive rate but also a lower true positive rate. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=1.1]{figures/roc.png}
+    \captionsetup{font=large}
+    \caption{The\textcolor{white}{.}ROC\textcolor{white}{.}space\textcolor{white}{.}for\textcolor{white}{.}a\textcolor{white}{.}"better"\textcolor{white}{.}and\textcolor{white}{.}"worse"\textcolor{white}{.}classifier}
+    \label{fig:roc}
+\end{figure}
+\subsubsection{Confusion matrix}
+Three confusion matrices are shown for each model. Each confusion matrix describes the model performance on each set of data.
+
+\subsection{Model performance}
+In this paragraph, we describe the performance metrics of each model defined in the Table \ref{table:hp_table}.
+The AUC and the loss are considered as the "training metrics". The confusion matrices and the classification performance are considered as the "testing performances".
+
+\subsubsection{Model1 results}
+For "Model1", the training metrics, the classification metrics and the confusion metrics are shown in Figure \ref{fig:1_tr} , Table \ref{M1_tab} and Figure \ref{fig:1_cm}, respectively.\\
+%\textbf{Training Metrics}
+% Figure \ref{fig:1_tr}
+\begin{figure}[H]% [!ht]
+    \centering
+    \begin{subfigure}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/1_tloss.png}
+        \caption{Model 1 Loss Curve on all the 100 training epochs}
+    \label{fig:1_tloss}
+    \end{subfigure}
+    \begin{subfigure}{0.45\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/1_ploss.png}
+         \caption{Model 1 Loss Curve on the last 50 training epochs}
+    \label{fig:1_ploss}
+    \end{subfigure}
+    \begin{subfigure}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/1_auc.png}
+        \caption{Model 1 ROC Curve}
+    \label{fig:1_auc}
+    \end{subfigure}
+\caption{Model 1 Training Metrics}
+ \label{fig:1_tr}
+\end{figure}
+% \textbf{Testing Metrics}\\
+ As shown in figures \ref{fig:1_tloss}, \ref{fig:1_ploss} and \ref{fig:1_auc}, there is not underfitting neither overfitting in the learning process. The AUC curve illustrates that the model achieves efficiently the classification of flows and is able to distinguish  malicious flows from begnin ones. So, the accuracy of the model reaches 99.89 \% and an F1 score of 99.94\%, as shown in Table \ref{M1_tab}. 
+ \begin{table}[H]%[!ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Set of data & Accuracy & Precision & Recall & F1 Score \\
+\hline
+Training data & 0.9989 & 0.9993 & 0.9994 & 0.9994 \\
+\hline
+Testing set & 0.9972 & 0.9995 & 0.9972 & 0.9983 \\
+\hline
+Per-minutes graphs set & 0.9006 & 0.9984 & 0.8910 & 0.9416 \\
+\hline
+\end{tabular}
+\caption{Model 1\textcolor{white}{.}Classification\textcolor{white}{.}Metrics\textcolor{white}{.} }
+\label{M1_tab}
+\end{table}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/1_cm1.png}
+        \caption{Model 1 confusion matrix on training data}
+    \label{fig:1_cm1}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/1_cm2.png}
+        \caption{Model 1 confusion matrix on the testing set}
+    \label{fig:1_cm2}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/1_cm3.png}
+        \caption{Model 1 confusion matrix on the Per-minutes graphs set}
+    \label{fig:1_cm3}
+    \end{subfigure}
+    \captionsetup{font=large}
+    \caption{Model 1 Confusion Matrices}
+    \label{fig:1_cm}
+\end{figure}
+In the same way, the confusion matrices in Fig\ref{fig:1_cm} show a significant ability to classify flows. The probability of error in classification is less then 0.7\%  for class 0 and 0.05\% for class 1. 
+\subsubsection{Model 2 results}
+  For "Model2", the training metrics, the classification metrics and the confusion metrics are shown in Figure \ref{fig:2_tr}, Table \ref{M2_tab} and Figure \ref{fig:2_cm}, respectively.\\
+  As shown in figures \ref{fig:2_tloss}, \ref{fig:2_ploss} and \ref{fig:2_auc}, there is not underfitting neither overfitting in the learning process. The AUC curve illustrates that the model achieves efficiently the classification of flows and is able to distinguish  malicious flows from begnin ones. So, the accuracy of the model reaches 99.79 \% and an F1 score of 99.89\%, as shown in Table \ref{M2_tab}.
+% \textbf{Training Metrics}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/2_tloss.png}
+        \caption{Model 2 Loss Curve on all the 100 training epochs}
+    \label{fig:2_tloss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/2_ploss.png}
+        \caption{Model 2 Loss Curve on the last 50 training epochs}
+    \label{fig:2_ploss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/2_auc.png}
+        \caption{Model 2 ROC Curve}
+    \label{fig:2_auc}
+    \end{subfigure}
+    \captionsetup{font=large}
+\caption{Model 2 Training Metrics}
+ \label{fig:2_tr}
+\end{figure}
+
+ %\textbf{Testing Metrics}
+\begin{table}[H]%[!ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Set of data & Accuracy & Precision & Recall & F1 Score \\
+\hline
+Training data & 0.9979 & 0.9982 & 0.9996 & 0.9989 \\
+\hline
+Testing set & 0.9917 & 0.9960 & 0.9941 & 0.9951 \\
+\hline
+Per-minutes graphs set & 0.9413 & 0.9964 & 0.9382 & 0.9664 \\
+\hline
+\end{tabular}
+\caption{Model 2\textcolor{white}{.}Classification\textcolor{white}{.}Metrics}
+\label{M2_tab}
+\end{table}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/2_cm1.png}
+        \caption{Model 2 confusion matrix on training data}
+    \label{fig:2_cm1}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/2_cm2.png}
+        \caption{Model 2 confusion matrix on the testing set}
+    \label{fig:2_cm2}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/2_cm3.png}
+        \caption{Model 2 confusion matrix on the Per-minutes graphs set}
+    \label{fig:2_cm3}
+    \end{subfigure}
+    \captionsetup{font=large}
+    \caption{Model 2 Confusion Matrices}
+    \label{fig:2_cm}
+\end{figure}
+The confusion matrices in Fig\ref{fig:2_cm} show a significant ability to classify flows but which is less than the ability of the first model. The probability of errors in classification is around 2\%  for class 0 and 0.04\% for class 1. 
+\subsubsection{Model 3 results}
+  In "Model3", the training metrics, the classification metrics and the confusion metrics are shown in Figure \ref{fig:3_tr} , Table \ref{M3_tab} and Figure \ref{fig:3_cm}, respectively.\\
+  As shown in figures \ref{fig:3_tloss}, \ref{fig:3_ploss} and \ref{fig:3_auc}, results are similar to previous models. The accuracy of the model reaches 96.34 \% and an F1 score of 97.96\%, as shown in Table \ref{M3_tab}.
+ %\textbf{Training Metrics}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/3_tloss.png}
+        \caption{Model 3 Loss Curve on all the 100 training epochs}
+    \label{fig:3_tloss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/3_ploss.png}
+        \caption{Model 3 Loss Curve on the last 50 training epochs}
+    \label{fig:3_ploss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/3_auc.png}
+        \caption{Model 3 ROC Curve}
+    \label{fig:3_auc}
+    \end{subfigure}
+\captionsetup{font=large}
+\caption{Model 3 Training Metrics}
+ \label{fig:3_tr}
+\end{figure}
+ %\textbf{Testing Metrics}
+\begin{table}[H]%[!ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Set of data & Accuracy & Precision & Recall & F1 Score \\
+\hline
+Training data  & 0.9634 & 0.9986 & 0.9614 & 0.9796 \\
+\hline
+Testing set & 0.9754 & 0.9965 & 0.9740 & 0.9851 \\
+\hline
+Per-minutes graphs set & 0.9000 & 0.9964 & 0.8922 & 0.9414 \\
+\hline
+\end{tabular}
+\caption{Model 3\textcolor{white}{.}Classification\textcolor{white}{.}Metrics\textcolor{white}{.}}
+\label{M3_tab}
+\end{table}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/3_cm1.png}
+        \caption{Model 3 confusion matrix on training data}
+    \label{fig:3_cm1}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/3_cm2.png}
+        \caption{Model 3 confusion matrix on the testing set}
+    \label{fig:3_cm2}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/3_cm3.png}
+        \caption{Model 3 confusion matrix on the Per-minutes graphs set}
+    \label{fig:3_cm3}
+    \end{subfigure}
+    \captionsetup{font=large}
+    \caption{Model 3 Confusion Matrices}
+    \label{fig:3_cm}
+\end{figure}
+However, the confusion matrices in Fig\ref{fig:3_cm} show a significant increase in the probability of errors in classification which is around 3\%  for class 0  and more than 12.08\% for class 1.
+\subsubsection{Model 4 results}
+In "Model4", the training metrics, the classification metrics and the confusion metrics are shown in Figure \ref{fig:4_tr} , Table \ref{M4_tab} and Figure \ref{fig:4_cm}, respectively.\\
+  As shown in figures \ref{fig:do_1_tloss}, \ref{fig:do_1_ploss} and \ref{fig:do_1_auc}, results are similar to previous models. The accuracy of the model reaches 39,85 \% and an F1 score of 51.08\%, as shown in Table \ref{M4_tab}.
+% \textbf{Training Metrics}\\
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_1_tloss.png}
+        \caption{Model 4 Loss Curve on all the 100 training epochs}
+    \label{fig:do_1_tloss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_1_ploss.png}
+        \caption{Model 4 Loss Curve on the last 50 training epochs}
+    \label{fig:do_1_ploss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_1_auc.png}
+        \caption{Model 4 ROC Curve}
+    \label{fig:do_1_auc}
+    \end{subfigure}
+    \captionsetup{font=large}
+\caption{Model 4 Training Metrics}
+ \label{fig:4_tr}
+\end{figure}
+%\textbf{Testing Metrics}
+\begin{table}[H]%[!ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Set of data & Accuracy & Precision & Recall & F1 Score \\
+\hline
+Training data & 0.3985 & 0.9999 & 0.3431 & 0.5108 \\
+\hline
+Testing set & 0.4801 & 0.9996 & 0.3797 & 0.5503 \\
+\hline
+Per-minutes graphs set & 0.2897 & 0.9995 & 0.2113 & 0.3488 \\
+\hline
+\end{tabular}
+\caption{Model 4 Classification Metrics}
+\label{M4_tab}
+\end{table}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_1_cm1.png}
+        \caption{Model 4 confusion matrix on training data}
+    \label{fig:do_1_cm1}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_1_cm2.png}
+        \caption{Model 4 confusion matrix on the testing set}
+    \label{fig:do_1_cm2}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_1_cm3.png}
+        \caption{Model 4 confusion matrix on the Per-minutes graphs set}
+    \label{fig:do_1_cm3}
+    \end{subfigure}
+    \captionsetup{font=large}
+    \caption{Model 4 Confusion Matrices}
+    \label{fig:4_cm}
+\end{figure}
+The confusion matrices in Fig\ref{fig:4_cm} show better values of the probability of errors in classification, compared to the model 3.  This probability is around 1.04\%  for class 0  and more than 0.06\% for class 1.
+\subsubsection{Model 5 results}
+   For "Model5", the training metrics, the classification metrics and the confusion metrics are shown in Figure \ref{fig:5_tr} , Table \ref{M5_tab} and Figure \ref{fig:5_cm}, respectively.\\ No contributions are observed compared to Models 3 and 4. 
+
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_1_tloss.png}
+        \caption{Model 5 Loss Curve on all the 100 training epochs}
+    \label{fig:do_1_tloss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_1_ploss.png}
+        \caption{Model 5 Loss Curve on the last 50 training epochs}
+    \label{fig:do_1_ploss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_1_auc.png}
+        \caption{Model 5 ROC Curve}
+    \label{fig:do_1_auc}
+    \end{subfigure}
+    \captionsetup{font=large}
+\caption{Model 5 Training Metrics}
+ \label{fig:5_tr}
+\end{figure}
+\begin{table}[H]%[!ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Set of data & Accuracy & Precision & Recall & F1 Score \\
+\hline
+Training data & 0.9983 & 0.9987 & 0.9994 & 0.9991 \\
+\hline
+Testing set & 0.9945 & 0.9986 & 0.9949 & 0.9967 \\
+\hline
+Per-minutes graphs set & 0.9473 & 0.9969 & 0.9444 & 0.9699 \\
+\hline
+\end{tabular}
+\caption{Model 5 Classification Metrics}
+\label{M5_tab}
+\end{table}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_2_cm1.png}
+        \caption{Model 5 confusion matrix on training data}
+    \label{fig:do_2_cm1}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_2_cm2.png}
+        \caption{Model 5 confusion matrix on the testing set}
+    \label{fig:do_2_cm2}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_2_cm3.png}
+        \caption{Model 5 confusion matrix on the Per-minutes graphs set}
+    \label{fig:do_2_cm3}
+    \end{subfigure}
+    \captionsetup{font=large}
+    \caption{Model 5 Confusion Matrices}
+    \label{fig:5_cm}
+\end{figure}
+
+\subsubsection{Model 6 results}
+
+  For "Model6", the training metrics, the classification metrics and the confusion metrics are shown in Figure \ref{fig:6_tr} , Table \ref{M6_tab} and Figure \ref{fig:6_cm}, respectively.\\ No contributions are observed compared to models 3, 4 and 5. 
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_2_tloss.png}
+        \caption{Model 6 loss curve on all the 100 training epochs}
+    \label{fig:do_2_tloss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_2_ploss.png}
+        \caption{Model 6 loss curve on the last 50 training epochs}
+    \label{fig:do_2_ploss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_2_auc.png}
+        \caption{Model 6 ROC Curve}
+    \label{fig:do_2_auc}
+    \end{subfigure}
+    \captionsetup{font=large}
+\caption{Model 6 Training Metrics}
+ \label{fig:6_tr}
+\end{figure}
+
+\begin{table}[H]%[!ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Set of data & Accuracy & Precision & Recall & F1 Score \\
+\hline
+Training data  & 0.9981 & 0.9985 & 0.9994 & 0.9990 \\
+\hline
+Testing set & 0.9904 & 0.9977 & 0.9908 & 0.9942 \\
+\hline
+Per-minutes graphs set & 0.9430 & 0.9968 & 0.9397 & 0.9674 \\
+\hline
+\end{tabular}
+\caption{Model 6 Classification Metrics}
+\label{M6_tab}
+\end{table}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_2_cm1.png}
+        \caption{Model 6 confusion matrix on training data}
+    \label{fig:do_2_cm1}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_2_cm2.png}
+        \caption{Model 6 confusion matrix on the testing set}
+    \label{fig:do_2_cm2}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_2_cm3.png}
+        \caption{Model 6 confusion matrix on the Per-minutes graphs set}
+    \label{fig:do_2_cm3}
+    \end{subfigure}
+    \captionsetup{font=large}
+    \caption{Model 6 Confusion Matrices}
+    \label{fig:6_cm}
+\end{figure}
+
+\subsubsection{Model 7}
+For "Model7", the training metrics, the classification metrics and the confusion metrics are shown in Figure \ref{fig:7_tr}, Table \ref{M7_tab} and Figure \ref{fig:7_cm}, respectively.\\
+  As shown in figures \ref{fig:do_3_tloss}, \ref{fig:do_3_ploss} and \ref{fig:do_3_auc}, there is an overfitting in the learning process. The AUC curve illustrates that the model achieves efficiently the learning and the loss function is minimized. Then, the loss increases due to an overfitting in the learning. The accuracy of the model reaches 91.7 \% and an F1 score of 95.66\%, as shown in Table \ref{M7_tab}.
+ %\textbf{Training Metrics}
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_3_tloss.png}
+        \caption{Model 7 loss curve on all the 100 training epochs}
+    \label{fig:do_3_tloss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_3_ploss.png}
+        \caption{Model 7 loss curve on the last 50 training epochs}
+    \label{fig:do_3_ploss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_3_auc.png}
+        \caption{Model 7 ROC Curve}
+    \label{fig:do_3_auc}
+    \end{subfigure}
+    \captionsetup{font=large}
+\caption{Model 7 Training Metrics}
+ \label{fig:7_tr}
+\end{figure}
+
+% \textbf{Testing Metrics}
+\begin{table}[H]%[!ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Set of data & Accuracy & Precision & Recall & F1 Score \\
+\hline
+Training data  & 0.9170 & 0.9169 & 1.0000 & 0.9566 \\
+\hline
+Testing set & 0.8406 & 0.8402 & 0.9999 & 0.9131 \\
+\hline
+Per-minutes graphs set & 0.9012 & 0.9024 & 0.9984 & 0.9479 \\
+\hline
+\end{tabular}
+\caption{Model 7 Classification Metrics}
+\label{M7_tab}
+\end{table}
+
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_3_cm1.png}
+        \caption{Model 7 confusion matrix on training data}
+    \label{fig:do_3_cm1}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_3_cm2.png}
+        \caption{Model 7 confusion matrix on the testing set}
+    \label{fig:do_3_cm2}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_3_cm3.png}
+        \caption{Model 7 confusion matrix on the Per-minutes graphs set}
+    \label{fig:do_3_cm3}
+    \end{subfigure}
+    \captionsetup{font=large}
+    \caption{Model 7 Confusion Matrices}
+    \label{fig:7_cm}
+\end{figure}
+As a result, the confusion matrices in Fig\ref{fig:7_cm} show significant degradation of the ability to classify flows. The number of false classification in class 0 is greater then the true ones (more than 5531.2\%). It is acceptable for class 1. This remains true for training set, testing set and per-minute dataset.
+\subsubsection{Model 8 results}
+For "Model8", the training metrics, the classification metrics and the confusion metrics are shown in Figure \ref{fig:8_tr}, Table \ref{M8_tab} and Figure \ref{fig:8_cm}, respectively.\\
+  As shown in figures \ref{fig:do_4_tloss}, \ref{fig:do_4_ploss} and \ref{fig:do_4_auc}, there is also an overfitting  in the learning process (similare to model 7). The AUC curve illustrates that the model achieves efficiently the learning and the loss function is minimized. Then, the loss increases due to an overfitting in the learning. The accuracy of the model goes under 8.46\% and an F1 score is less than  00.04\%, as shown in Table \ref{M8_tab}.
+
+\begin{figure}[H]%[!ht]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_4_tloss.png}
+        \caption{Model 8 loss curve on all the 100 training epochs}
+    \label{fig:do_4_tloss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_4_ploss.png}
+        \caption{Model 8 loss curve on the last 50 training epochs}
+    \label{fig:do_4_ploss}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_4_auc.png}
+        \caption{Model 8 ROC Curve}
+    \label{fig:do_4_auc}
+    \end{subfigure}
+    \captionsetup{font=large}
+\caption{Model 8 Training Metrics}
+\label{fig:8_tr}
+\end{figure}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Set of data & Accuracy & Precision & Recall & F1 Score \\
+\hline
+Training data  & 0.0846 & 0.7739 & 0.0002 & 0.0004 \\
+\hline
+Testing set  & 0.1621 & 0.6143 & 0.0002 & 0.0005 \\
+\hline
+Per-minutes graphs set  & 0.0997 & 0.6103 & 0.0004 & 0.0008 \\
+\hline
+\end{tabular}
+\caption{Model 8 Classification Metrics}
+\label{M8_tab}
+\end{table}
+\begin{figure}[H]%[!htbp]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_4_cm1.png}
+        \caption{Model 8 confusion matrix on training data}
+    \label{fig:do_4_cm1}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+         \includegraphics[width=\linewidth]{figures/ev/do_4_cm2.png}
+        \caption{Model 8 confusion matrix on the testing set}
+    \label{fig:do_4_cm2}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/ev/do_4_cm3.png}
+        \caption{Model 8 confusion matrix on the Per-minutes graphs set}
+    \label{fig:do_4_cm3}
+    \end{subfigure}
+    \captionsetup{font=large}
+    \caption{Model 8 Confusion Matrices}
+    \label{fig:8_cm}
+\end{figure}
+As a result, the confusion matrices in Fig\ref{fig:8_cm} show significant degradation of the ability to classify flows. The number of false classification in class 1 is greater than the true ones (the rate of successful classification is less than 0.04\%). It is acceptable for class 0. This remains true for training set, testing set and per-minute dataset.
+\subsection{Discussion}
+Models 1, 2, 5 and 6 are less deeper, so, they are associated with best performance metrics on training and testing data. The high performance in testing data indicates that these models are well fitted. Models 3 and 4 show less performance compared to previous models because they are deeper models.This is interpreted as an underfitting which requires more epochs to reach best performance. Model 3 is better than model 4  due the use of the Leaky ReLU activation function. \\
+According to classification metrics on per-minutes graph dataset, performance metrics are always less than metrics achieved on training and testing data. This can be interpreted by the  difference made in the level of the passed messages by hosts to flows in graphs in different sizes, in other words, models trained on large graphs cannot capture patterns in small graphs due to the difference in the hosts state resulting from less number of flows.\\
+This problem can be addressed by training the model on graphs with different sizes or using more suitable GNN model for this case. Using GraphSAGE in spite of GCN for flow-to-host message passing can be a solution for this problem.

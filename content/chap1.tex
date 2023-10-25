@@ -1,0 +1,23 @@
+\chapter{\textcolor{white}{.}Introduction}
+\label{chapter:introduction}
+
+
+
+\section{\textcolor{white}{.}Motivation}
+
+In the last few years, the number of cyber-attacks with serious economic and privacy damages targeting organizations has exponentially grown. 
+Several network attacks, especially DDoS attacks, which may be launched from malicious nodes in a network. This type of attacks increases network traffic towards the victim node which consumes its resources and increases queuing times and transmission delays. It has a negative impact on the entire network since the attack occurs from multiple nodes, which runs out its equipments computational resources and exhausts the bandwidth resources of its communication channels. This disturbs most of the network functionalities including the routing process.
+Building accurate Network Intrusion Detection Systems (NIDS) to detect and mitigate DDoS attacks becomes with paramount importance in order to secure computer networks.
+
+\section{Proposed Approach}
+
+The purpose of this master’s thesis is to propose a GNN based DDoS attacks detection approach. GNNs is a sub class of Neural Networks that operates on graph-structured data. 
+GNN was applied in ML problems from several domains such as physics, recommendation systems and networking, and showed high capabilities in solving these problems. 
+The majority of the existing ML solutions operates only on a one flow characteristics to classify it as benign or malicious. While, in detecting some attacks such as DDoS, combined hosts and different flows features is significant for prediction. 
+We aims at using the power of GNN in detecting DDoS attack malicious flows launched in a network, by encoding it as a graph and combining its hosts and different flows features, to get better representation for its flows, that will be better meaningful for classification.
+\section{Memory Structure}
+
+This this organized as follows. In the first chapter, we introduce a general idea about this memory by representing its structure, motivation and the approach that we aims at implement it.
+The second chapter is dedicated to introduce the state of the art. Where, we start with presenting the DDoS attack types and effects on the victims and on the whole networks. We also introduce a presentation for GNNs. We finish the state of the art by presenting some proposed solutions for DDoS attacks detection and especially GNNs-based ones. 
+In the third chapter, we provide a detailed presentation for the proposed graph representation and GNN model architecture. The forth chapter is dedicated for presenting the experiments. Where we present the data preprocessing steps, the training hyperparameters and the performance evaluation.
+In the last chapter, we will elaborate on future works and enhancements that can be released to tackle the DDoS attack detection problem with GNNs.

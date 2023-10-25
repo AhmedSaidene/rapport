@@ -1,0 +1,12 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+% Abstracts are usually around 100–300 words
+% \noindent\lipsum[2-4]
+As the last few years have seen an exponentially growth of cyber-attacks, securing computer networks becomes with a paramount importance. Particularly, Distributed Denial of service (DDoS) attacks detection and mitigation are one of the most serious challenges in cybersecurity. Network Intrusion Detection Systems (NIDS) play a crucial role in detecting intrusions and cyber-attacks by monitoring network traffic to identify potential threats. Today, artificial intelligence (AI) and especially Machine Learning (ML) and Deep Learning (DL) powered intrusion detection approaches are commonly used by researchers and succeed in raising NIDSs performance and abilities. 
+
+This master’s thesis aims at building a Graph Neural Networks (GNN) classifier to detect DDoS attacks. GNNs is a sub class of Neural Networks that operates on graph-structured data. It is able to release prediction tasks on graphs, nodes and edges. By encoding a computer network as a graph, GNNs can be applied to a classification problem that aims at detecting malicious DDoS attack flows. 
+
+We propose a network heterogeneous graph representation that encodes hosts and flows as nodes. We exploit the GNN's capabilities that pave the way for passing messages between nodes in order to make their hidden states better relevant. Then, resulting flows representations are forwarded to a binary NN classifier to be recognised as benign or malicious.
+
+The proposed model was trained and evaluated using the well known CICDDoS2019 dataset and showed high classification performance with more than 99\% of accuracy.

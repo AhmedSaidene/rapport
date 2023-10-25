@@ -1,0 +1,39 @@
+\chapter{Conclusion\textcolor{white}{.}and\textcolor{white}{.}Future\textcolor{white}{.}Work}
+\label{chapter:conclusion}
+
+\section{Conclusion\textcolor{white}{.}}
+GNNs were created to work over graph-structured data, that essentially makes
+them ideal for certain domains. Networks and security are among those domains since network data and flow traffic can be naturally represented as a graph. \\
+Most of the existing
+approaches analyse network flows individually, effectively obviating the fact that
+flows present inter-dependencies between them. That is why this novel approach
+can unlock and create tremendous contributions.
+GNNs are based on the Message Passing (MP) capabilities. MP is the process to learn node's features from their neighbors taking in consideration their relationship and their dependencies. In MP, neighbor nodes participate in defining the features of a node. MP is more complicated when nodes have different types. In this case, the GNN is said heterogeneous, and noted H-GNN. In 2-type H-GNN, bidirectional MP is recommended since it exists at least two edges connecting the nodes of the graph.
+In this thesis, a new GNN model is defined to handle the detection of DDoS attacks using a directed multipartite graph representation.\\
+Compared to existing approaches, the proposed solution is more efficient in terms of:
+\begin{enumerate}
+    \item Accuracy and classification performances: it outperforms the majority of the existing approaches,
+    \item Time complexity and execution time: in the message-passing process, one message is transmitted trough each edge, where some of the existing approaches use more complex and costly message-passing mechanisms,
+    \item Graph representation: each node is presented with multiple sub-states, this allows optimising the message-passing process and provides better description for each node.
+\end{enumerate}
+\section{Future\textcolor{white}{.}Work}
+GNNs have been proven to be a very powerful alternative for network intrusion
+detection. However, we are still in the early stage of research. The main
+challenge faced by the industry is the availability of insightful security datasets
+that could be used for training. Despite the fact that there are a few datasets
+available, most of them can not be used to create graph representations of
+network events. However, some of them can still be synthetically modified to
+serve the purpose.
+Starting from the basis of this research project, future research could continue examining how to implement a GNN model  that leverages anomaly-based system for network intrusion detection. \\
+In future work, we aim at creating graph representations of multiple types of attacks so that exploiting better the GNNs in larger and more complex networks architectures, by considering other networks entities such as switches, which leads to better expressiveness. This will pave the way to perform recommendations and complex decision making such as security-based routing and DDoS attacks mitigation techniques. \\  
+There is still a lot of work to focus on before implementing this technology in a
+productive environment, but we believe that we have been able to shed a light on
+the potential that GNNs could have in the future of network security.\\
+%
+% In conclusion, Graph Neural Networks (GNNs) emerge as a pivotal advancement in the realm of intrusion detection, show casing their exceptional prowess in grappling with the complexities of network security. By adeptly navigating the intricate landscape of interconnected entities, GNNs harness the strength of graph structures to unveil subtle patterns and deviations that signify potential threats. Their efficacy stems from the ingenious utilization of the message passing mechanism, which facilitates the creation of nuanced node embeddings tailored to capture the nuances of the network's topology and the contextual information embedded within.
+% GNNs offer a rich tapestry of architectures, including Message Passing GNNs (MPGNN), Graph Convolutional Neural Networks (GCNN), and Graph Attention Networks (GAT). These architectural variations provide a versatile toolkit for intrusion detection practitioners, enabling them to adapt GNNs to specific use cases, network topologies, and threat landscapes. This adaptability extends their applicability beyond the realm of traditional security measures, allowing for proactive threat detection and swift response to evolving intrusion techniques.
+% As we move forward, the frontier of GNN research remains dynamic and promising. The field continues to evolve, birthing novel architectures and refining existing techniques. This evolutionary process stands as a testament to the enduring potential of GNNs in fortifying network security. The symbiotic relationship between GNNs and intrusion detection is poised to grow stronger, and their integration into real-world security infrastructures is imminent.
+% The ascent of GNNs in the fight against cyber threats presents a paradigm shift from traditional rule-based systems to intelligent, data-driven approaches. This shift not only bolsters our ability to counter sophisticated attacks but also opens the door to preemptive strategies that anticipate and thwart potential breaches. The transformative impact of GNNs in intrusion detection underscores their significance as a cornerstone of future cybersecurity endeavors, holding the potential to safeguard digital ecosystems with unprecedented resilience.
+% In the ever-evolving landscape of cyber threats, GNNs stand as a beacon of innovation, a testament to the power of graph-based analysis, and a potent tool in the hands of cybersecurity professionals. As organizations and individuals alike grapple with increasingly complex and stealthy intrusions, the adoption of GNNs is not just a strategic advantage, but a necessity to fortify our digital world against a relentless tide of cyber adversaries.
+
+%

@@ -1,0 +1,431 @@
+\chapter{State Of The Art}
+\label{chapter:chap2}
+
+
+\section{Introduction}
+
+DDoS attacks are recognized as one of the most significant threats that the world faces. According to Cloudfare, application-layer DDoS attacks has increased by 72\%  while network-layer attacks has reached more than 109\% in the Q2 of 2022, compared to the same period of the previous year. \\A significant effort need to be deployed  by organizations, cooperatively and not competitively, in order to handle this risk and protect their resources. It’s recommended that automated solutions of DDoS detection and mitigation need to be developed. Basically,  these solutions need to analyze traffic and apply real-time fingerprinting fast enough to block short-lived attacks. \\ This section presents the most recent approaches for DDoS attacks detection and mitigation and highlights their limitations.
+\section{Distributed\textcolor{white}{.}Denial\textcolor{white}{.}of\textcolor{white}{.}Service\textcolor{white}{.}(DDoS)\textcolor{white}{.}Attacks}
+\label{ddossoa}
+
+\subsection{Cyber-attacks: An Overview}
+Today, cyber attacks are emerging as a serious issue which needs more attention. In this chapter, some classes of cyber attacks are presented. Then, more focus is addressed to DDoS attacks as the most popular threads in networking. Finally, the current state of the art of approaches used to detect and mitigate DDoS is presented.
+
+
+\subsubsection{Web attacks}
+\begin{itemize}
+    \item \textbf{SQL injection attack:} Attackers aim at getting the entire SQL database content and obtain unauthorized access or sensitive websites data. This can be achieved by manipulating databases behind web applications using malicious queries. 
+    \item \textbf{Cross-site scripting (XSS) attack:}  Attackers inject malicious code into a trusted website that are intended to be executed once a client accesses the web application in order to obtaining sensitive information from the client machine like session tokens and cookies.
+\end{itemize}
+
+
+\subsubsection{Exploration attacks}
+Obtaining information about the targeted victim is always the first step in any successful attack. This can be achieved by:
+\begin{itemize}
+    \item \textbf{Probe attacks:} before starting his attack, an attacker scans the target system to discover some information that can assist him in exploiting the remote system such as the operating system versions and open ports.
+    \item \textbf{Vulnerability Scan: }It's a type of network security assessment that involves automated tools to identify potential vulnerabilities. Its goal is identifying the security weaknesses that could be exploited in gaining unauthorized access to a system or stealing sensitive information.
+   \item \textbf{Ping Sweep(ping scan):} Involves sending a series of ICMP (Internet Control Message Protocol) Echo Request (ping) packets to a range of IP addresses on a network, and performing analysis on returned ICMP Echo Reply (pong) packets in order to identify active and responding hosts.
+\end{itemize}
+
+\subsubsection{Botnet attacks}
+The intruder controls several target devices, and runs malicious activities such as stealing information, fraud attacks and launching DDoS.
+
+
+\subsection{Definition}
+
+Denial of Service (DoS) attacks consist of sending a massive volume of packets to a target resource with the aim of temporarily or permanently disrupting the services provided by that resource. It can be implemented in network, transport and application layers using different protocols, such as TCP, UDP, ICMP and HTTP \cite{ddos2019}. In these attacks, the attacker attempts to deny the services from legitimate users, either solely or in a distributed manner. When an attack is run through multiple nodes, a DDoS attack is taking place.
+
+
+
+
+\subsubsection{Taxonomies of DDoS attacks}
+Several categorisations for DDoS attacks were proposed. Authors in
+\cite{insdn} categorized them into two main groups: 
+\begin{itemize}
+    \item \textbf{Network-based DoS attacks:} these attacks  aim at overwhelming the benign users by flooding the network bandwidth or victim machine by a large amount of spoofed packets. The attacker often uses different protocols like UDP, TCP, or ICMP.
+    \item \textbf{Application-based  DoS attacks:} they mainly target the top application layer (services) using application-level protocols  such as HTTP. Despite the fact that these attacks do not require high bandwidth, however, it can cause serious damage to the target server and consume its resources in a short time.
+\end{itemize}
+
+In \cite{ddos2019} an other taxonomy is proposed (see Figure \ref{fig:cicDDosTaxonomy}):
+\begin{itemize}
+    \item \textbf{Reflection-based DDoS attacks:} These attacks involve concealing the attacker's identity by using botnets to send attack traffic (e.g., HTTP requests) to the victim. The attacker sends these requests to reflector servers with the victim’s source IP address which floods the victim with response packets. These attacks are executed using transport layer protocols such as Transmission Control Protocol (TCP), User Datagram Protocol (UDP), or a combination of them.
+    \item \textbf{Exploitation-based DDoS attacks:} In these attacks, the attacker attempts to directly exploit a remote service. These attacks can be carried out using transport layer protocols like TCP or UDP.
+\end{itemize}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.6]{figures/cicDDosTaxonomy.png}
+    \captionsetup{font=large}
+    \caption{ Taxonomy}
+    \label{fig:cicDDosTaxonomy}
+\end{figure}
+
+
+
+\subsubsection{Most popular DDoS attacks}
+
+\begin{itemize}
+    \item \textbf{TCP SYN flooding attack: }It consists of not finishing the three-way handshake of a TCP session establishment. When the source receives an SYN Ack from the server,  it does not reply with SYN ack leading to holding down the communication despite resources are already reserved. \cite{edgeiiot} \cite{ciciot2023}
+    \item \textbf{HTTP flooding attack:} This Intends to flood a target server with HTTP queries. \cite{edgeiiot}
+    \item \textbf{ICMP flooding attack:} In Internet Control Message Protocol (ICMP) flooding attack, a targeted device is flooded by attackers through ICMP echo-reply queries (pings). By flooding the destination with query packets, the network is constrained to reply with an identical number of reply packets. This makes the destination unavailable to handle regular network traffic.
+    \item \textbf{UDP flooding attack:} Consists of sending a large number of UDP packets to random ports on the target machine at a very high rate. In fact, the available bandwidth of the network gets exhausted, system crashes and performance degrades. \cite{ddos2019}
+    \item \textbf{UDP-Lag:} It disrupts the connection between the client and the server. It can be carried by using a hardware switch known as lag switch or by a software program that runs on the network and hogs the bandwidth of other users.\cite{ddos2019}
+\end{itemize}
+
+
+
+
+
+\subsubsection{Fall-outs of DDoS attacks}
+\textbf{On a target host: }\\
+A DoS attack consumes the victim's resources by increasing its network traffic. DDoS occurs from multiple nodes, resulting in a higher arrival attack rate. Its impact is often larger than a DoS attack \cite{glass}.\\
+\textbf{On networks: }\\
+DDoS attacks are very powerful techniques to attack intranet and Internet networks \cite{ddos2019}.
+Many researches are carried out on the detection and the mitigation of this class of attacks In SDN. Authors in \cite{analysis1} and \cite{analysis2}Analyzed the effect of these attacks on SDNs. They conclude that DDoS attacks impact the SDN more than  the traditional network architecture. They affect not only the data plane or end hosts, but also the control plane of the network.
+On the data plane, it increased packet delays and caused a large amount of packet drops\cite{analysis1}.  This work \cite{analysis2} illustrates the impact of  DDoS attack on an SDN switch and showed that DDoS raise the CPU utilization, the memory usage and the number of flow table entries in  the OpenFlow agent .
+ Authors in \cite{insdn} talked about the negative effect of DDoS on the control plane. Indeed,  sending a large number of  packets  which have no matched rules inside flow tables requires transmitting these flows, in the form of packet-In message, to the SDN controller. A high packet-In messages rate leads to overwhelming the SDN controller by exhausting its CPU and memory resources. In addition, an SDN controller or its OPenflow channels can also be disturbed due to the significant number of two-way forwarded packets between switches and controllers.
+
+
+\subsection{DDoS Attacks Detection And Mitigation\textcolor{white}{.}approaches}
+\subsubsection{Classical approaches}
+Authors in \cite{ali1} and in \cite{ali2} have evaluated the impact of DoS attacks on the network performance parameters like the control plane bandwidth (i.e., controller-switch channel), latency, switches flow tables and the controller performance, without providing a solution to overcome these issues. \\
+In \cite{ali3}, authors have proposed FlowRanger, a controller-side scheme that allows to detect and mitigate DoS attacks. It consists of : (1) calculating a trust value for each packet-in message based on its source, (2) queuing the message in the priority queue corresponding to its trust value and (3) processing messages according to a weighted Round Robin strategy. Although FlowRanger can reduce the impact of DoS attacks on network performance by prioritizing legitimate flows for processing in spite of malicious ones, it does neither prevent flooding the controller nor limit overloading switch’s flow-tables. 
+Sahay et al. \cite{ali4} introduced a self-management approach that relies on collaboration between an Internet Service Provider (ISP) and its customers to mitigate DDoS attacks. The ISP collects feedback from customers about network performance parameters, like controller response time, and utilizes this information to enforce security policies and update network flow tables. Consequently, legitimate flows are given higher priority and routed through paths with better quality, while questionable flows are assigned lower priority and directed through paths reserved for potentially malicious traffic. However, this approach has limitations, as it cannot entirely prevent the risk of overwhelming the controller and overloading flow tables on switches.\\
+Another solution proposed by Dao et al. \cite{ali5} involves IP filtering to safeguard Software-Defined Networking (SDN) networks against distributed DDoS attacks. This method involves setting short timeouts for flow entries originating from IP sources considered malicious and long timeouts for trusted sources. While effective in dropping malicious traffic, this approach may inadvertently drop legitimate traffic if the flow duration exceeds the assigned timeout.\\
+Finally, Authors in \cite{ali6} have proposed a solution namely SDN-Guard. Its designed to protect SDN networks from DoS attacks through (1) dynamic rerouting of potential malicious traffic, (2) adjustment of flow timeouts, (3) and aggregation of flow rules. This solution incorporates an Intrusion Detection System (IDS) to assess the threat probability of incoming flows. %However, it introduces communication overhead to the control plane due to message exchanges between the controller, the IDS, and network functions within the cloud.
+
+
+
+\subsubsection{Machine learning based\textcolor{white}{.}approaches}
+Machine learning showed a high performance in DDoS attack detection. A review in \cite{ml1} showed many ML-based approaches which have improved DDoS attack detection in SDNs. 
+In \cite{ml2}, \cite{ml3}, \cite{ml4} and \cite{ml5}, authors used ML-based DDoS attack detection approaches that offer high classification metrics.\\
+In \cite{ml6}, a systematic benchmarking analysis of the existing machine learning techniques for the detection of malicious traffic in SDNs is proposed. Authors have pinpointed the limitations of traditional ML methods and put forth various principles to establish a more resilient framework. The presence of irrelevant features and the lack of labeled training data cause some weaknesses in identifying attacks when conventional ML techniques are employed. They highlight that DL emerges as one of the most promising solutions for addressing ML shortcomings.
+
+
+\subsubsection{Deep Learning based\textcolor{white}{.}approaches}
+Deep learning algorithms have been widely used in SDN-based architectures to solve the problem of DDoS mitigation and intrusion detection. In \cite{dl1}, authors present a Gated Recurrent Unit Recurrent Neural Network (GRU-RNN) which enables intrusion detection systems for SDNs. Authors in \cite{dl2} propose a novel deep learning based Convolutional Neural Network (CNN) approach for feature detection. In \cite{dl3}, authors apply a deep learning approach for flow-based anomaly detection in an SDN environment. 
+In \cite{dl4}, authors use Recurrent Neural Network (RNN) with Gated Recurrent Units (GRU), Convolutional Neural Network (CNN) and MultiLayer Perceptron(MLP), respectively for flow-based anomaly detection in SDN environments.
+
+\subsubsection{Reinforcement Learning based\textcolor{white}{.}approaches}
+reinforcement learning (RL) is commonly used in DoS attacks detection and mitigation. In this context, \cite{dosRLReview} presents a survey of these techniques in the smart grid.
+Several\textcolor{white}{.}researches\textcolor{white}{.}view\textcolor{white}{.}the\textcolor{white}{.}mitigation\textcolor{white}{.}of\textcolor{white}{.}DDoS\textcolor{white}{.}attacks\textcolor{white}{.}as a\textcolor{white}{.}sequential\textcolor{white}{.}decision\textcolor{white}{.}making\textcolor{white}{.}problem and use Deep Reinforcement Learning (DRL) techniques to achieve the aim. 
+\\In \cite{rl1},\textcolor{white}{.}authors\textcolor{white}{.}propose\textcolor{white}{.}‘‘Multiagent Router Throttling’’.\textcolor{white}{.}It\textcolor{white}{.}consists\textcolor{white}{.}of\textcolor{white}{.}installing multiple RL\textcolor{white}{.}agents on a set\textcolor{white}{.}of\textcolor{white}{.}routers\textcolor{white}{.}that\textcolor{white}{.}learn\textcolor{white}{.}to\textcolor{white}{.}throttle or\textcolor{white}{.}rate-limit traffic towards a victim server. \\
+Yandong et al. \cite{rl2} propose a\textcolor{white}{.}DRL based framework, which is able to mitigate DDoS flooding attacks in real time. It can defend\textcolor{white}{.}against\textcolor{white}{.}a wide\textcolor{white}{.}range of DDoS\textcolor{white}{.}flooding attacks such as TCP SYN, UDP, and ICMP\textcolor{white}{.}flooding. Mainly, it\textcolor{white}{.}learns the\textcolor{white}{.}patterns of\textcolor{white}{.}all the traffic\textcolor{white}{.}in\textcolor{white}{.}order to\textcolor{white}{.}throttle the\textcolor{white}{.}attack traffic and keep the traffic of benign users unaltered. \\
+Authors in \cite{rl3} adopt RL to\textcolor{white}{.}the L7\textcolor{white}{.}DDoS problem,\textcolor{white}{.}which is viewed as a Markov decision process. The\textcolor{white}{.}proposed\textcolor{white}{.}approach\textcolor{white}{.}inherits advantages from both\textcolor{white}{.}learning-based approaches and Markov models and\textcolor{white}{.}incorporates\textcolor{white}{.}environmental and\textcolor{white}{.}contextual\textcolor{white}{.}factors to distinguish L7 DDoS traffic from the\textcolor{white}{.}legitimate application-layer traffic. \\
+However, authors in \cite{rl2} revealed that RL-based methods cannot be\textcolor{white}{.}extended to a\textcolor{white}{.}real large-scale SDN network\textcolor{white}{.}because discretizing the continuous action space leads to the\textcolor{white}{.}combinatorial explosion and\textcolor{white}{.}the well-known curse of dimensionality. Despite\textcolor{white}{.}the\textcolor{white}{.}fact\textcolor{white}{.}that\textcolor{white}{.}RL is a promising technique to mitigate DDoS attacks, little efforts were devoted to defining\textcolor{white}{.}RL-based\textcolor{white}{.}approaches to\textcolor{white}{.}countermeasure\textcolor{white}{.}cyber-attacks. 
+
+
+\subsection{Limitations of some approaches categories}
+In \cite{stgcn}, some of the weaknesses of DDoS attacks detection and mitigation methods are represented. \\
+These methods still face certain challenges such as forged IP addresses, falsified traffic patterns, and encrypted messages. Most of the existing \textbf{detection methods} cannot find out the path of the attack traffic within the network.
+The \textbf{defense strategy} either deployed on all switches (distributed) or on the destination switch (centralized). This can cause unnecessary overhead if the controller indiscriminately issuing defense strategies to all switches. Because usually not all switches in the network contain DDoS attack traffic, however, centralized defense strategies suffer from higher delays and less efficiency compared to distributed strategies.\\
+
+The table \ref{tab:limits} presents the weaknesses of some specific types of detection and mitigation methods.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{Methods Type} & \textbf{Weakness} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Detection Methods}} \\
+\hline
+ Signature-based & Cannot cope with encrypted data \\
+\hline
+\quad Statistics-based & 
+  \begin{itemize}
+    \item Easily bypassed through forged traffic patterns
+    \item Difficulties in distinguishing between flash crowd traffic and DDoS attack traffic
+  \end{itemize} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Mitigation Methods}} \\
+\hline
+Rate Limiting & Do not distinguish between legitimate traffic and attack traffic \\
+\hline
+Middle Box & Require additional hardware and bring unpredictable delay \\
+\hline
+\end{tabular}
+\caption{Methods and Weaknesses}
+\label{tab:limits}
+\end{table}
+
+
+
+\section{Graphs Neural Networks}
+\label{gnnsoa}
+Tangible entities in the real world are frequently characterized by their interconnections with other entities. The assembly of these entities, along with the intricate web of connections between them, naturally manifests as a graph. 
+Scientists have engineered neural networks tailored to process this graph-structured data, commonly referred to as graph neural networks (GNNs), for a span of over a decade. Recent advancements have significantly amplified their capabilities and expressive potential. Consequently, we are witnessing the emergence of practical use cases across diverse domains. In order to understand GNN, it is overriding to master the concept of graphs. Notions which are closely related to GNN are defined in this section.
+\subsection{Definition}
+Graphs are a ubiquitous data structure and a universal language for describing complex systems. In the most general view, a graph is simply a collection of objects (i.e., nodes), along with a set of interactions (i.e., edges) between pairs of these objects.
+The power of the graph formalism lies both in its focus on relationships between points (rather than the properties of individual points), as well as in its generality. The same graph formalism can be used to represent social networks, interactions between drugs and proteins, the interactions between atoms in a molecule.
+\subsubsection{Formalism}
+Formally,\textcolor{white}{.}a\textcolor{white}{.}graph\textcolor{white}{.}G =\textcolor{white}{.}(V, E)\textcolor{white}{.}is\textcolor{white}{.}defined\textcolor{white}{.}by a\textcolor{white}{.}set\textcolor{white}{.}of\textcolor{white}{.}nodes\textcolor{white}{.}V\textcolor{white}{.}and\textcolor{white}{.}a\textcolor{white}{.}set of edges E between these nodes. We denote an edge going from node u $\in$ V to node v $\in$ V as (u, v) $\in$ E. 
+\subsubsection{Graph variants}
+Various graphs are found in nature and multiple domains. Problem settings are defined based on the structure, scale, and graph types present in the data. Below we present the variants of graphs.
+
+
+\textbf{Undirected/directed graph}\\
+An undirected graph \(G = (V, E)\) is characterized by undirected edges, indicating a bidirectional connection between nodes. On the other hand, a directed graph \(G_D\) is defined as an ordered pair \(G_D = (V, E_D)\), where \(V\) denotes the set of nodes in the graph, and \(E_D\) represents ordered pairs that specify directed links.\\
+
+\textbf{Heterogeneous graph}\\
+\label{heterog}
+\textcolor{white}{.}In\textcolor{white}{.} heterogeneous\textcolor{white}{.}graphs,\textcolor{white}{.}nodes\textcolor{white}{.}can be imbued
+with types, meaning\textcolor{white}{.}that\textcolor{white}{.}we \textcolor{white}{.}can \textcolor{white}{.} partition\textcolor{white}{.}the\textcolor{white}{.}set\textcolor{white}{.}of nodes into disjoint sets
+$V = V_1  \cup  V_2  \cup  .. \cup  V_k \text{ where } V_i \cap V_j = \emptyset \forall i \neq j$. \\
+Multipartite graphs are a well-known special case of heterogeneous graphs, where edges can only connect nodes that have different types, i.e., $(u, t_i, v) \in E \implies u \in  V_j , v \in V_k \And j \neq k$.
+
+\textbf{Dynamic graph}\\
+Unlike a static graph, a dynamic graph changes through the time. Its input set might also change. In this variant of graphs, nodes and edges can be updated, added and deleted over the time. It allows adaptive structures or algorithms that operate on dynamic  internal structures to be applied to graphs. 
+The dynamic G graph is formally defined as $G_t = (V_t, E_t) \neq G_{t+1} = (V_{t+1}, E_{t+1})$, where $G_t$ represents the graph at timestamp t, and $G_{t+1}$ represents the graph at timestamp t + 1.
+
+\textbf{Attributed graph }\\
+Edges in graphs with additional information, such as their weights or types, are called attributed graphs. The attributed graph is represented by $G_a =  (V, E, L)$, where L denotes the function that assigns attributes to the nodes and edges so that the attributes are represented as L(V) and L(E), respectively. As a result, having a graph with edges storing extra information, such as the relationship between nodes, becomes more manageable when working with relational data.
+
+
+
+
+
+\subsection{Machine\textcolor{white}{.}learning\textcolor{white}{.}on\textcolor{white}{.}graphs}
+ML algorithms can be extended to learn on graph structures. This learning can be supervised or unsupervised, as done with classical data structure.
+
+
+Several tasks can be done in graphs ML as shown in fig \ref{fig:tasks}:
+\begin{itemize}
+    \item \textbf{Graph level tasks},where predictions are performed on instances representing entire graphs such as \textbf{classifying} a computer's networks to predict even it's under attack or not and \textbf{regression} such as forecasting a road traffic speed,
+    \item At\textcolor{white}{.}the\textbf{\textcolor{white}{.}node level},\textcolor{white}{.}it's\textcolor{white}{.}usually\textcolor{white}{.}a node\textcolor{white}{.}property prediction. For example, classifying a node representing a host in a networks as compromised or not,
+    \item \textbf{Edge\textcolor{white}{.}level}\textcolor{white}{.}link\textcolor{white}{.}predictions\textcolor{white}{.}are\textcolor{white}commonly {.}used\textcolor{white}{.} in\textcolor{white}{.}GNNs based recommendation\textcolor{white}{.}systems\textcolor{white}{.}to\textcolor{white}{.}predict \textcolor{white}{.} whether\textcolor{white}{.}two\textcolor{white}{.}nodes\textcolor{white}{.}in\textcolor{white}{.}a\textcolor{white}{.}graph will be related or not,
+    \item Community detection or subgraph property prediction are considered as \textbf{sub-graph level} tasks. Social\textcolor{white}{.}networks\textcolor{white}{.}use\textcolor{white}{.} community\textcolor{white}{.}detection\textcolor{white}{.}to\textcolor{white}{.}determine \textcolor{white}{.}how \textcolor{white}{.}people\textcolor{white}{.}are\textcolor{white}{.}connected. 
+\end{itemize}
+
+
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{figures/tasks.png}
+    \captionsetup{font=large}
+    \caption{Graph ML Tasks}
+    \label{fig:tasks}
+\end{figure}
+
+\subsection{Graph\textcolor{white}{.}Neural Network}
+Graph Neural Networks (GNNs) are a class of deep learning methods designed to learn on on graphs-structured data. GNNs can do what Convolutional Neural Networks (CNNs) failed to do.
+\subsubsection{The Power of GNNs}
+First, existing deep learning techniques can learn on euclidian data and not on graph-structured data \cite{network_euclidian}. For example, convolutional neural networks (CNNs) are well-defined only over grid-structured inputs (e.g., images), while recurrent neural networks (RNNs) are well-defined only over sequences (e.g., text). Figure \ref{fig:network_euclidian} shows the difference between euclidian and graph-structured data.
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{figures/network_euclidian.png}
+    \captionsetup{font=large}
+    \caption{Euclidian VS graph-structured data}
+    \label{fig:network_euclidian}
+\end{figure}
+
+\subsection{Neural Message Passing}
+The main feature of a GNN model is that it uses a form of neural message passing in which vector messages are exchanged between nodes and updated using neural networks \cite{gnn}.\\
+In a GNN, during each message-passing iteration, a hidden embedding $h_u^{(k)}$ of each node $u \in V$ is updated according to information aggregated from its neighborhood $\mathcal{N}(u)$ (Figure \ref{fig:comp_g}). This message-passing update can be formulated as follows:
+\begin{equation}\label{eq_h}
+h^{(k+1)}_u = \text{UPDATE}^{(k)}\left(h^{(k)}_u, m^{(k)}_{\mathcal{N}(u)}\right)
+\end{equation}
+Where $m_N(u)$ is the "message" that is aggregated from $u$'s graph neighborhood $\mathcal{N}(u)$.\\
+So, the formula \ref{eq_h} can be expressed as follows
+\begin{equation}
+h^{(k+1)}_u = \text{UPDATE}^{(k)}\left(h^{(k)}_u, \text{AGGREGATE}^{(k)}\left(\left\{h^{(k)}_v, \forall v \in \mathcal{N}(u)\right\}\right)\right)
+\end{equation}
+\textit{UPDATE} and \textit{AGGREGATE} are arbitrary differentiable functions (i.e. SUM, MEAN and neural networks). Finally, the resulting state can be obtained as follows:
+\begin{equation}
+z_u = h^{(K)}_u, \forall u \in V.
+\end{equation}
+At $k = 0$, initial embeddings are set to the input features for all nodes $u$: 
+\begin{equation}
+h^{0}_u = x_u, \forall u \in V. 
+\end{equation}
+At each iteration $k$ of the GNN:
+\begin{itemize}
+    \item the AGGREGATE function takes as input the set of embeddings of the nodes in u’s graph neighborhood ${\mathcal{N}(u)}$ and generates a message $m^{(k)}_{\mathcal{N}(u)}$ based on this aggregated neighborhood information.
+    \item Then, the function UPDATE combines the message $m^{(k)}_{\mathcal{N}(u)}$ with the previous embedding $h^{(k-1)}_u$ of node u to generate the updated embedding $h^{(K)}_u$ .
+\end{itemize}
+
+
+After running $K$ iterations of the GNN message passing, the output of the final layer $z_u$ defines the resulting embedding of the node $u$.
+% \begin{equation}
+% z_u = h^{(K)}_u, \forall u \in V. 
+% \end{equation}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.6]{figures/computational_g.png}
+    \captionsetup{font=large}
+    \caption{Computation graph}
+    \label{fig:comp_g}
+\end{figure}
+
+
+
+
+\subsection{Types of Graph Neural Networks}
+
+ 
+\subsubsection{Message Passing Neural Networks (MPNNs)}
+The basic GNN message passing is defined as follows:
+\begin{equation}
+h^{(k)}_u = \sigma\left(W^{(k)}_{\text{self}}h^{(k-1)}_u + W^{(k)}_{\text{neigh}}\sum_{v\in\mathcal{N}(u)}h^{(k-1)}_v + b^{(k)}\right)
+\end{equation}
+In this equation:
+
+     \begin{itemize}
+         \item $h^{(k)}_u$ represents the embedding of node  $u$ at iteration $k$,\\
+         \item $\sigma$ represents an activation function such as tanh ReLU,\\
+         \item $W^{(k)}_{\text{self}}$  and  $W^{(k)}_{\text{neigh}}$  are trainable parameter matrices specific to the self-connection and neighbor connections, respectively, at iteration $k$,\\
+         \item $h^{(k-1)}_u$ and  $h^{(k-1)}_v$ represent the node $u$ and its neighbors embeddings at the previous iteration $(k-1)$,\\
+         \item $\mathcal{N}(u)$ represents the neighborhood of node $u$,\\
+         \item $b^{(k)}$ is a bias term specific to $k^{th}$iteration.
+     \end{itemize}
+
+It can be equivalently defined through the UPDATE and AGGREGATE functions:
+\begin{equation}
+m_N(u) = \sum_{v\in\mathcal{N}(u)} h_v = \text{AGGREGATE}^{(k)}\left(\left\{h^{(k)}_v, \forall v \in \mathcal{N}(u)\right\}\right)
+\end{equation}
+
+\begin{equation}
+\text{UPDATE}(h_u, m_N(u)) = \sigma\left(W_{\text{self}}h_u + W_{\text{neigh}}m_N(u)\right)
+\end{equation}
+
+
+\subsubsection{Graph Convolutional Network (GCN) }
+\label{gcn_dicription}
+
+Graph Convolutional Networks (GCN) \cite{kipf} is the most commonly used GNN architecture. It is based on neighbor aggregation, which involves aggregating node features using the summation function. One of the issues related to summing neighbors is that it can be unstable and highly sensitive to the degrees of nodes, so that, GCN uses the symmetric-normalized aggregation defined as follows:
+\begin{equation}
+m_N(u) = \sum_{v \in \mathcal{N}(u)} \frac{h_v}{\sqrt{ |\mathcal{N}(u)||\mathcal{N}(v)|}}
+\end{equation}
+
+Where |.| is an expression of the norm value of a vector.\\
+Thus, a GCN model consists of a set of layers where each layer uses the message passing function as follows:
+
+\begin{equation}
+h^{(k)}_u = \sigma\left(W^{(k)}
+\sum_{v \in \mathcal{N}(u) \cup \{u\}} \frac{h_v}{\sqrt{|\mathcal{N}(u)||\mathcal{N}(v)|}}\right)
+\end{equation}
+
+where 1) neighboring node features are first transformed by a normalized weight matrix, based on their degree, 2) summed up, Lastly 3) the bias vector is applied to the aggregated output. \\
+\cite{gnn_review1}  describes the process of GCN functioning process. fig \ref{fig:gcn_img} illustrates this process with multiple graph convolutional layers to perform nodes classification, where, a convolutional layer encapsulates the embedding of each node by aggregating information about the features of its neighbors. Then, a non-linear activation (ReLU in the figure) is applied to the resulting layer outputs. By stacking multiple layers, the final hidden representation of each node receives messages from another neighborhood.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.95]{figures/gcn_img.png}
+    \captionsetup{font=large}
+    \caption{\cite{gnn_review1} GCN functioning process}
+    \label{fig:gcn_img}
+\end{figure}
+
+\subsubsection{Graphs SAmple and aggreGatE (GraphSAGE) }
+\label{GraphSAGE_sec}
+GraphSAGE \cite{GraphSAGE} is an inductive framework that generate a node embedding for previously unseen data by leverages node feature information. To this aim, a function that generates embeddings by sampling and aggregating features from a node’s local neighborhood is learned as seen in \ref{fig:graphsage_fig}.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.75]{figures/graphsage_fig.png}
+    \captionsetup{font=large}
+    \caption{\textcolor{white}{.}Visual\textcolor{white}{.}illustration\textcolor{white}{.}of\textcolor{white}{.}the GraphSAGE\textcolor{white}{.}sample\textcolor{white}{.}and\textcolor{white}{.}aggregate\textcolor{white}{.}approach}
+    \label{fig:graphsage_fig}
+\end{figure}
+
+\subsubsection{Graph Attention Network (GAT)}
+IN GCN, The coefficient is derived from the degree matrix of the graph and it heavily depends on the structure of the graph. Intuitively, it represents how important the features of a node j are for node i.\\
+The main idea behind GAT \cite{gat} is to compute the coefficient using a learnable attention mechanism. The weighted sum of neighbor node features for node u, denoted as $m_N(u)$ is calculated as follows:
+\begin{equation}
+m_{N(u)} = \sum_{v \in N(u)} \alpha_{u,v}  h_v
+\end{equation}
+where $\alpha_{u,v}$ denotes the attention on neighbor $v \in N (u)$ during the aggregation process at node $u$. 
+
+In the original GAT paper,  The attention coefficients $\alpha_{u,v}$ between node u and its neighbor node v is defined as follows:
+\begin{equation}
+\alpha_{u,v} = \frac{\exp(a   [W_{h_u} \oplus W_{h_v}])}{\sum_{v' \in N(u)} \exp(a   [W_{h_u} \oplus W_{h_{v'}}])}
+\end{equation}
+where:
+\begin{itemize}
+    \item $a^T$ is the transpose of a trainable attention vector.
+    \item $W$ is a trainable weight matrix,
+    \item $h_u$ and $h_v$ are the feature vectors respectively of nodes u and v,
+    \item $\oplus$ denotes the concatenation operation, i.e., concatenating $W*h_u$ and $W*h_v$.
+\end{itemize}
+
+
+
+\subsubsection{Spatial-temporal graph neural networks (STGNNs)}
+It learns from graphs, by considering spatial dependency and temporal dependency at the same time \cite{jiang}. Learning of the node embedding is based on both the neighborhood space and the historical space.
+
+\subsection{GNN's Applications}
+ In the last years, GNNs have become powerful and practical tools for problems that can be modeled by graphs. It is used in solving problems in several domains, including, but not limited to the following ones:
+
+
+\begin{itemize}
+    
+    \item Computer Vision: Graph convolution can be generalized from 2D convolution. As illustrated in \ref{fig:cv_gnn}, an image can be considered a special case of graphs where each pixel is represented as a node and connected to adjacent pixels,
+    \item NLP (Natural Language Processing): A common application of GNNs in natural language processing is text classification. GNNs use the interrelationships between documents or words to infer document labels,
+    \item Recommender systems: Graph-based recommendation systems represent items and users with nodes. This allows achieving high-quality recommendations By leveraging  relations between items, users and users, as well as content information. Scoring the importance of an item to a user \ref{fig:recom_sis_img} is key concept to these recommenders and can be cast as a link prediction problem,
+    \item Traffic forecasting \cite{gapp2}, nodes can represent highways sensors and a graph level prediction is performed to predict speed or density,
+    \item IoT \cite{iot} \cite{gapp3},
+    \item Combinatorial Optimization \cite{peng}.
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.4]{figures/cv_gnn.png}
+    \captionsetup{font=large}
+    \caption{Graph representation of an Image}
+    \label{fig:cv_gnn}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{figures/recom_sis_img.png}
+    \captionsetup{font=large}
+    \caption{The graph encode users interacts with items in order predict the recommend items that users might like}
+    \label{fig:recom_sis_img}
+\end{figure}
+
+\begin{figure}
+\centering
+    \includegraphics[scale=0.9]{figures/unveilingg.png}
+    \captionsetup{font=large}
+    \caption{\cite{unveiling} Graph Representation}
+\label{fig:unveilingg}
+\end{figure}
+    
+\begin{figure}
+\centering
+    \includegraphics[scale=0.8]{figures/unveilingmp.png}
+    \captionsetup{font=large}
+    \caption{\cite{unveiling}Message Passing}
+\label{fig:unveilingmp}
+\end{figure}
+
+
+
+
+%references: \cite{GRL_Book}, \cite{g_presentation} and \cite{gnn_review}
+
+ 
+
+\section{GNNs-based (D)DoS Attacks Detection Methods}
+This section is dedicated to pinpointing the power of GNN's existing solutions in intrusion detection and especially DDoS attacks detection. To this aim, we highlight some of the GNNs-based intrusion detection solutions and especially GNNs-based DDoS attacks detection and mitigation ones.
+\subsection{GNNs-based intrusion detection}
+Authors in In \cite{gnnIntrisionDetection1}, present a comprehensive review of graph-based DL solutions for problems in various types of \textbf{communication networks}. Additionally, they proved that GNN-based solutions are proven effective for a wide range of problems in different network scenarios and are worthy of being explored deeper in the future. They consider GNNs as suitable for solving problems in communication networks. This due to the GNNs strong learning ability to capture the spatial information hidden in the network topology and their generalization ability to be used in unseen typologies when the networks are dynamic. Intrusion detection is one of these problems.\\
+In this context, most of the existing approaches treat and classify a flow independently using its specific features. They also ignore its relationship with other flows that is not properly adapted to numerous real-world attacks which rely on complex multiflow strategies. As suggested in \cite{unveiling}, modeling these attacks as graphs (as shown in the Figure \ref{fig:unveilingg}) will enhance the detection and the mitigation process. \\
+In \cite{gnnIntrisionDetection2}, authors mentioned several ML and DL based approaches for network intrusion detection that directly train on the dataset without considering the graph topology information. They mentioned that these methods have limited capability in the detection of complex network attacks (such as Botnet attacks, distributed port scans and DNS amplification attacks) since it requires a more global network view and traffic. They reveal that the excellent GNNs performance on graph-structured data and the fact that a network is a natural graph are the reasons of applying GNN to intrusion detection systems by  some scholars in the recent years. 
+
+Authors in \cite{unveiling} carry out their methodology in an intrusion detection model, not only for DDoS attack detection. As seen in \ref{fig:unveilingg}, they define two types of undirected edges: one from the source host to the flow (S → f), and another from the flow node to the destination host (f → D). \\
+In their message-passing phase, a learnable message function $\sigma_{type}$ (depending on the edge type it’s even $\sigma_{sf}$ or $\sigma_{fd}$) given the concatenation of the hidden states of two connected nodes is applied. To update the state of a node i, $\delta_{type}$ (depending on  the node type, it’s even $\delta_{h}$ or $\delta_{f}$) is applied on the concatenation of its current hidden state of and its aggregated message. $\sigma_{sf}$ and $\sigma_{fd}$ are modeled as 2-layer fully-connected NNs, while $\delta_{h}$ and $\delta_{f}$ are modeled as Gated Recurrent Units (GRUs).\\
+The number of message-passing iterations is equal to T = 8, and the size of the hidden states is equal to 128 elements.
+
+\subsection{GNNs-based DDoS attacks detection}
+
+In \cite{glass} a framework for DDoS attacks detection in SDN-Based Smart Grid namely \textbf{GLASS} is proposed. In the first stage, GLASS use GCN perform a graph level prediction on a graph representing the network in order to classify it as under DDoS attack or not. If the network is under attack, compromised a Phasor Measurement
+Units (PMUs) are identified thought spectral clustering.\\
+Authors in \cite{ graphddos} discuss the importance of observing packet relationships to efficiently detect DDoS attacks. Their proposed solution \textbf{GraphDDoS} exploits endpoint traffic graphs in which nodes represent packets that belong to the communication between two endpoints, including multiple flows in the same graphs.  The GNN model is intended to manage the heterogeneity of the introduced graph structure through different initial hidden states, message functions, and aggregation functions between host nodes and flow nodes. This approach allows catching peculiar patterns that appear in specific DDoS attacks such as HTTP GET and SYN Flood attacks. This helps in classifying the flow nodes are as a specific attack or benign traffic.\\
+In \cite{Ftgnet}, a model called \textbf{ FTG-Net} is proposed. It uses flow-level graphs inspired by \cite{ graphddos}, replacing the N nodes limit with the introduction of time slots. Traffic-level and flow-level relationships have been combined by developing a two-level hierarchical graph representation and a GNN model able to process it was proposed.\\
+\textbf{GLD-Net} was proposed in \cite{gldnet} to fuse topological structure and traffic features. Traffic data is divided into time slots and for each of them a subgraph is built, inserting topology information (degree centrality and betweenness centrality) as node features and flow statistics as edge features. The subgraphs are processed using Graph Attention Network (GAT) layers that simultaneously analyze traffic and topological features. The outputs are then interpreted as a time series input for an LSTM network.
+
+\section{Conclusion}
+Mainly, GNNs provides an innovative tool to handle the issue of DDoS attack detection through an efficient learning based on node's features as well as relationships between nodes. GNNs are based on the message passing process which transfers learning between nodes according to a graph of relations built between them. 

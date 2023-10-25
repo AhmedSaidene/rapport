@@ -1,0 +1,183 @@
+\chapter{Proposed Approach}
+\label{chapter:approach}
+
+
+
+
+\section{Introduction}
+\label{section:ApproachIntroduction}
+As introduced in the state of the art section,  DDoS attacks are based on multiple flows strategies. As presented in Figure \ref{fig:unveilingg}, each attacker sends a large amount of malicious flows which will be received by the victim. Hereby, a DDoS attack can be modeled through 1) one or more sources (attackers), 2) one or more destinations (victims), and 3) a set of attack flows. In other words, in DDoS attacks, as one or many sources sends malicious flows to one or many destinations, a key idea is that flows of the same attacks can have the same source or the same destination. As a result, relying a flow with other flows with flows of the same attacks can be achieved through its source and destination.\\
+
+
+\section{Background}
+
+\section{Overview}
+\label{overviw}
+ Our approach is loosely similar to \cite{unveiling}, we use but differs from it into the following points: 1) we use a simpler mechanism to aggregate messages and updates nodes states. 2) It requires only one message-passing iteration. for each flow f, 3) A flow f final state $z_f$ combines features of the flow as well as features obtained from attackers and victims (the presented points 1, 2 and 3 in the introduction section \ref{section:ApproachIntroduction}). This combination make final flow's state with better expressiveness and more suitable for classification. Each flow in the DDoS attack is associated to a source which is an attacker and a destination which is a victim. So, the classification of a flow requires the consideration of both the source and the destination in the flow's features.  \\
+Therefore, each flow will be defined through its specific features to which features of the source and the destination are added.  
+The flow's source $S_f$, can be extracted from the sent flow and the destination $D_f$ state can be extracted from he received flows. In fact, $z_f$ implicitly expresses the flows having $S_f$ as source and the flows having $S_f$ as destination. Graph Neural Networks (GNN) can achieve this objective by exploiting its message-passing abilities to compute $z_f$. The\textcolor{white}{.} proposed\textcolor{white}{.} approach is\textcolor{white}{.} illustrated\textcolor{white}{.} in\textcolor{white}{.} figure \ref{fig:app_fig}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.85]{figures/approach_gnn_flow_chart.png}
+    \captionsetup{font=large}
+    \caption{Approach Overview}
+        \label{fig:app_fig}
+\end{figure}
+
+
+\section{Graph Representation}
+In this section we provide a detailed introduction for the proposed graph representation. 
+One major contribution in our approach is introducing a new graph encoding for the communication graph. It consists of modifying the communication graph proposed in \cite{unveiling} in order to obtain a suitable graph encoding for an optimized message passing mechanism and achieve better expressive nodes hidden states.  
+\subsection{Notations}
+This subsection is dedictes to explain the meaning of some notations related to the proposed approach. This will ease the comprehension of the next parts. 
+A network consists of a graph $G =(V, E)$ where V the set of nodes and E represents the set of edges. \ref{table:notations} presents a list of adopted notations.
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+Notations & Meaning \\
+\hline
+$E_t$ & The sub set of $E$ that contains all edges of type $t$\\
+\hline
+$h_i$ & A nodes representing a host $i$\\
+\hline
+$f_i$ & A nodes representing a flow $i$\\
+\hline
+$Xh_i$ & The hidden state of the node $h_i \text{ represneting the host } i$\\
+\hline
+$Xv_i$ & The hidden state of the node $f_i \text{ represneting the flow } i$\\
+\hline
+$x_v$ & Can be any sub-state of a node $v \in V$\\
+\hline
+$z_{f_i}$ & The final state of the flow $i$ \\
+\hline
+\end{tabular}
+\caption{Notations}
+\label{table:notations}
+\end{table}
+
+\subsection{Graph Definition}
+We define formally our graph encoding. A network is encoded in a Directed Multipartite (\ref{heterog} ) graph $G = (V, E)$, where: 
+\begin{itemize}
+    \item V = $V_{flows}  \cup  V_{hosts}$ the set of graph nodes,
+    \item E = $\{ E_{fsrc}  \cup  E_{fdst}  \cup  E_{srcf}  \cup  E_{dstf}  \}$ the set of graph edges,
+    \item $V_{flows} = \{ f_1, ... , f_n \}$: the set of $n$ nodes $f_i$ representing flows in the network,
+    \item $V_{hosts} = \{ h_1, ... , h_m \}$: the set of $m$ nodes $h_i$ representing hosts in the network, including attackers and victims,
+    \item $E_{fsrc} = \{ e = (u, fsrc , v) \And u \in V_{flows} \And v \in V_{hosts} \}$: the set of edges joining each flow u with its source host v,
+    \item $E_{fdst} = \{  e = (u, fdst, v) \And u \in V_{flows}  \And v \in V_{hosts}  \}$: the set of edges joining each flow u with its destination v,
+    \item $E_{srcf} = \{  e = (u, srcf , v) \And u \in V_{hosts} \And  v \in V_{flows}  \}$: the set of edges joining each host u with a flow v that it sends,
+    \item $E_{dstf} = \{  e = (u, dstf , v) \And u \in V_{hosts} \And  v \in V_{flows}  \}$: the set of edges joining a host u to a flow v that it receives.
+\end{itemize}
+
+\subsection{Node's State}
+In this paragraph, node's states are defined. Unlike existing approaches, a node's state in our proposed approach  contains multiple features obtained from different contributors. This paves the way for better expressiveness and optimizes the message passing process. \\
+A node's state is defined as follows:
+\begin{itemize}
+    \item For hosts: the state $X_{h_i}$ of a host $h_i$ is presented by: $X_{h_i} = [S_{h_i} , D_{h_i}]$ where $S_{h_i}$ and $D_{h_i}$ represent source's and destination's states of $h_i$,respectively
+    \item For flows: the state $X_{f_i}$ of a flow $f_i$ is defined as follows: $X_{f_i} = [S_{f_i},  X_{f_i},  D_{f_i} ]$ where:
+    \begin{itemize}
+        \item $X_{f_i}$: The features vector of the flow i,
+        \item $S_{f_i}$: The features vector extracted from $S_i$,
+        \item $D_{f_i}$: The features vector extracted from $D_i$,
+    \end{itemize}
+
+\end{itemize}
+
+\subsection{Graphic Illustration}
+After being formally defined, the proposed graph representation is presented with a graphic illustration to be more clarified. This subsection is dedicated for this aim. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.85]{figures/graph_exp.png}
+    \captionsetup{font=large}
+    \caption{Graph Representation}
+        \label{fig:graph_exp}
+\end{figure}
+
+The figure \ref{fig:graph_exp} demonstrates a graph that we notice G = (V, E) where: 
+\begin{itemize}
+    \item $V = V_{flows}  \cup  V_{hosts}$ and  $E = { E_{fsrc}  \cup  E_{fdst}  \cup  E_{fsrc}  \cup  E_{fdst} }$,
+    \item $V_{flows} = \{ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 \}$ the set of 8 nodes representing flows in the network,
+    \item $V_{hosts} = \{ h_1, h_2, h_3, h_4, h_5, h_6 \}$ the set of 6 nodes representing hosts in the network,
+    \item $E_{fsrc}, E_{fdst}, E_{srcf} \text{ and } E_{dstf} $ are the sets of edges respectively of types fsrc, fdst, srcf and dstf.
+\end{itemize}
+The legend in the figure \ref{fig:graph_exp} indicates the corresponding color of each type of edges. 
+According to the communications, G demonstrates that:
+\begin{itemize}
+    \item the host H1 sends the flow F1 to H2 and F2 and F3 to H4,
+    \item H3 sends F4 and F5 to H2 and receives from it F6 and
+    \item H5 sends F6 and F7 to H6, and receives from it F8.
+\end{itemize}
+According to the hidden states of the nodes, the figure \ref{fig:graph_exp} demonstrates the states of H1 and F1 as examples. 
+\section{\textcolor{white}{.}Message \textcolor{white}{.}passing}
+In the process of message passing, the following are considered:
+\begin{itemize}
+    \item  $m_{v, u, e} $= a message m is sent  from u to v through the edge e,
+    % it will be used then
+    \item $M_{v,t} = \text{AGGREGATION}({m_{v, u, e} \forall e \in  \mathcal{N}_t (v)})$: Aggregated message from all nodes u connected with edges of type t,
+    % \item  $ M_{v,T} = combine({ M_{v,t} for t in T}) $ from all type t in T
+    \item  $x_v = \text{UPDATE}(x_v , M_{v,t})$: UPDATE function updates only the sub-state $x_v$ of the node v.
+
+\end{itemize}
+
+ Initially, the state $X_{h_i}$ of a host $h_i$ is empty. All states are updated by performing the \textbf{flows\_to\_hosts message-passing}, happening from flows to sources through \textbf{fsrc} edges and  to destinations through \textbf{fdst} edges (as shown in Fig\ref{fig:approche_cg}).\\
+Then, the second message-passing step is \textbf{hosts\_to\_flows} is performed between hosts and flows. The $f_i$'s state $X_{f_i}$ is updated by passing messages from $S_f$ and $D_f$ respectively through \textbf{srcf} and \textbf{dstf} edges. As a result, the final state  $z_{f_i}$ is computed by combining source's and destination's features with flow's features.\\
+The algorithm \ref{approach_algo} proposes an implementation of the message-passing and update steps.\\
+\begin{algorithm}[H]
+\caption{Proposed message-passing and updating algorithm}\label{approach_algo}
+\SetAlgoNlRelativeSize{-1}
+\SetNlSty{textbf}{(}{)}
+\SetAlgoNlRelativeSize{1}
+\begin{algorithmic}
+\REQUIRE{\textcolor{white}{.}G(V, E): \textcolor{white}{.}A \textcolor{white}{.}graph\textcolor{white}{.} G with\textcolor{white}{.} a\textcolor{white}{.} set\textcolor{white}{.} of\textcolor{white}{.} nodes\textcolor{white}{.} V\textcolor{white}{.} and\textcolor{white}{.} a\textcolor{white}{.} set\textcolor{white}{.} of\textcolor{white}{.} edges\textcolor{white}{.} E, X: Flows features matrix}
+\KwResult{Z: The set of flows final states $z_i$}
+\tcp{Initialising flows states}
+\FOR{each $i \text{ in } V_{flows}$}
+\STATE $S_{f_{i}}\leftarrow  []$
+\STATE $D_{f_{i}}\leftarrow  []$
+\STATE $X_{f_{i}}\leftarrow  X_i$
+\ENDFOR\\
+\tcp{Initialising hosts states}
+\FOR{each $h_i \text{ in } V_{hosts}$}
+\STATE $S_{h_{i}}\leftarrow  []$
+\STATE $D_{h_{i}}\leftarrow  []$
+\ENDFOR\\
+\tcp{Update hosts representation}
+\FOR{each $h_i \text{ in } V_{hosts}$}
+\STATE $S_{h_{i}}\leftarrow  \text{UPDATE}(S_{h_{i}}, M_{h_i,fsrc})$
+\STATE $D_{h_{i}}\leftarrow  \text{UPDATE}(D_{h_{i}}, M_{h_i,fdst})$
+\ENDFOR
+\tcp{Update flows representation}
+\FOR{each $f_i \text{ in } V_{flows}$}
+\STATE $S_{f_{i}}\leftarrow  \text{UPDATE}(S_{f_{i}}, M_{h_i,srcf})$
+\STATE $D_{f_{i}}\leftarrow  \text{UPDATE}(D_{f_{i}}, M_{h_i,dstf})$
+\STATE $z_{f_i} \leftarrow S_{f_{i}} \text{ || } X_{f_{i}} \text{ || } D_{f_{i}} $
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Readout function}
+
+Given the final flow nodes' representation, the GNN executes a readout phase \ref{readout} as seen in \ref{fig:app_fig}. The set of flows representation is forwarded into a trainable readout function \textbf{READOUT(·)} that produces the model output. 
+In other words, this function is intended to map the final hidden-state of flow to it's corresponding label. This function predicts the label $y_{f_i}$ of a a node $f_i \in V_f$ thought its final embedding  $z_{f_i}$ as follows:
+
+\begin{equation}
+    y_{f_i} = \text{READOUT} (z_{f_i} ) \in \{0, 1\}
+\end{equation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{figures/approche_cg.png}
+    \captionsetup{font=large}
+    \caption{The proposed message-passing mechanism}
+    \label{fig:approche_cg}
+\end{figure}
+
+
+\section{Approach Discussion}
+\section{Conclusion}
+The proposed GNN model was described in this section throuht a detailed presentation for the proposed graph encoding and message passing mechanisme. In the next section, experimental evaluation of the proposed model will be presented and discussed.
+
+
+
+
